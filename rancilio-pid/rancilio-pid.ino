@@ -290,12 +290,9 @@ DeviceAddress sensorDeviceAddress;   // arrays to hold device address
 /********************************************************
    TSIC 30x TEMP
 ******************************************************/
-uint16_t temperature = 0;
+#include "ZACwire.h"
+ZACwire<2> TSIC;
 float Temperatur_C = 0;
-volatile uint16_t temp_value[2] = {0};
-volatile byte tsicDataAvailable = 0;
-unsigned int isrCounterStripped = 0;
-const int isrCounterFrame = 1000;
 
 /********************************************************
    BLYNK
@@ -628,89 +625,6 @@ void refreshBrewReadyHardwareLed(boolean brewReady) {
   }
 }
 
-/*****************************************************
- * fast temperature reading with TSIC 306
- * Code by Adrian with minor adaptions
-******************************************************/
-void ICACHE_RAM_ATTR readTSIC() { //executed every ~100ms by interrupt
-  isrCounterStripped = isrCounter % isrCounterFrame;
-  if (isrCounterStripped >= (isrCounterFrame - 20 - 100) && isrCounterStripped < (isrCounterFrame - 20)) {
-    byte strobelength = 6;
-    byte timeout = 0;
-    for (byte ByteNr=0; ByteNr<2; ++ByteNr) {
-      if (ByteNr) {                                    //measure strobetime between bytes
-        for (timeout = 0; digitalRead(pinTemperature); ++timeout){
-          delayMicroseconds(10);
-          if (timeout > 20) return;
-        }
-        strobelength = 0;
-        for (timeout = 0; !digitalRead(pinTemperature); ++timeout) {    // wait for rising edge
-          ++strobelength;
-          delayMicroseconds(10);
-          if (timeout > 20) return;
-        }
-      }
-      for (byte i=0; i<9; ++i) {
-        for (timeout = 0; digitalRead(pinTemperature); ++timeout) {    // wait for falling edge
-          delayMicroseconds(10);
-          if (timeout > 20) return;
-        }
-        if (!i) temp_value[ByteNr] = 0;            //reset byte before start measuring
-        delayMicroseconds(10 * strobelength);
-        temp_value[ByteNr] <<= 1;
-        if (digitalRead(pinTemperature)) temp_value[ByteNr] |= 1;        // Read bit
-        for (timeout = 0; !digitalRead(pinTemperature); ++timeout) {     // wait for rising edge
-          delayMicroseconds(10);
-          if (timeout > 20) return;
-        }
-      }
-    }
-    tsicDataAvailable++;
-  }
-}
-
-double getTSICvalue() {
-    /*
-    unsigned long now = millis();
-    if ( now <= 15000 ) return 115;
-    if ( now <= 25000 ) return 117;
-    if (now <= 30000) return 113;
-    if (now <= 33000) return 109;
-    if (now <= 36000) return 105;
-    if (now <= 39000) return 101;
-    if (now <= 41000) return 97;
-    return 92;
-    */
-    /*
-    unsigned long now = millis();
-    if ( now <= 15000 ) return 88;
-    if ( now <= 25000 ) return 91;
-    if (now <= 28000) return 92;
-    return 93; 
-    */
-    byte parity1 = 0;
-    byte parity2 = 0;
-    noInterrupts();                               //no ISRs because temp_value might change during reading
-    uint16_t temperature1 = temp_value[0];        //get high significant bits from ISR
-    uint16_t temperature2 = temp_value[1];        //get low significant bits from ISR
-    interrupts();
-    for (uint8_t i = 0; i < 9; ++i) {
-      if (temperature1 & (1 << i)) ++parity1;
-      if (temperature2 & (1 << i)) ++parity2;
-    }
-    if (!(parity1 % 2) && !(parity2 % 2)) {       // check parities
-      temperature1 >>= 1;                         // delete parity bits
-      temperature2 >>= 1;
-      temperature = (temperature1 << 8) + temperature2; //joints high and low significant figures
-      // TSIC 20x,30x
-      return (float((temperature * 250L) >> 8) - 500) / 10;
-      // TSIC 50x
-      // return (float((temperature * 175L) >> 9) - 100) / 10;
-    }
-    else return -50;    //set to -50 if reading failed
-}
-
-
 /********************************************************
   check sensor value. If < 0 or difference between old and new >10, then increase error.
   If error is equal to maxErrorCounter, then set sensorError
@@ -748,9 +662,9 @@ boolean checkSensor(float tempInput, float temppreviousInput) {
 *****************************************************/
 void refreshTemp() {
   previousInput = getCurrentTemperature() ;
+  unsigned long currentMillistemp = millis();
   if (TempSensor == 1)
   {
-    unsigned long currentMillistemp = millis();
     long millis_elapsed = currentMillistemp - previousMillistemp ;
     if ( floor(millis_elapsed / refreshTempInterval) >= 2) {
         snprintf(debugline, sizeof(debugline), "Main loop() hang: refreshTemp() missed=%g, millis_elapsed=%lu, isrCounter=%u", floor(millis_elapsed / refreshTempInterval) -1, millis_elapsed, isrCounter);
@@ -768,12 +682,9 @@ void refreshTemp() {
   }
   if (TempSensor == 2)
   {
-      if (tsicDataAvailable >0) { // TODO Failsafe? || currentMillistemp >= previousMillistemp + 1.2* refreshTempInterval ) {
-        //previousMillistemp = currentMillistemp;
-        //unsigned long start = millis();
-        Temperatur_C = getTSICvalue();
-        tsicDataAvailable = 0;
-        //unsigned long stop = millis();
+      if (currentMillistemp >= previousMillistemp + 1.2* refreshTempInterval ) {
+        previousMillistemp = currentMillistemp;
+        Temperatur_C = TSIC.getTemp();
         //DEBUG_print("%lu | temp=%0.2f | time_spend=%lu\n", start, Temperatur_C, stop-start);
         if (checkSensor(Temperatur_C, previousInput)) {
             updateTemperatureHistory(Temperatur_C);
@@ -1995,12 +1906,10 @@ void setup() {
 
   if (TempSensor == 2) {
     isrCounter = 950;  //required
-    attachInterrupt(digitalPinToInterrupt(pinTemperature), readTSIC, RISING); //activate TSIC reading
-    delay(200);
     while (true) {
-      previousInput = getTSICvalue();
+      previousInput = TSIC.getTemp();
       delay(200);
-      Input = getTSICvalue();
+      Input = TSIC.getTemp();
       if (checkSensor(Input, previousInput)) {
         updateTemperatureHistory(Input);
         break;
