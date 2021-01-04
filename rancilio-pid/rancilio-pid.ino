@@ -756,7 +756,7 @@ void brew() {
       //  DEBUG_print("brew(): brewswitch=%u | brewing=%u | waitingForBrewSwitchOff=%u\n", brewswitch, brewing, waitingForBrewSwitchOff);
       //  output_timestamp = aktuelleZeit;
       //}
-      if (brewswitch > 700 && not (brewing == 0 && waitingForBrewSwitchOff) ) {
+      if (brewswitch > brewSwitchThrehold && not (brewing == 0 && waitingForBrewSwitchOff) ) {
         totalbrewtime = (preinfusion + preinfusionpause + brewtime) * 1000;
         userActivity = millis();
         
@@ -791,8 +791,8 @@ void brew() {
           brewing = 0;
         }
       }
-  
-      if (brewswitch <= 700) {
+
+      if (brewswitch <= brewSwitchThrehold) {
         if (waitingForBrewSwitchOff) {
           DEBUG_print("brewswitch=off\n");
           userActivity = millis();
@@ -1717,7 +1717,7 @@ void setup() {
   delay(1000);
 
   //if brewswitch is already "on" on startup, then we brew should not start automatically
-  if (OnlyPID == 0 && (analogRead(pinBrewButton) >= 700)) { 
+  if (OnlyPID == 0 && (analogRead(pinBrewButton) >= brewSwitchThrehold)) { 
     DEBUG_print("brewsitch is already on. Dont brew until it is turned off.\n");
     waitingForBrewSwitchOff=true; 
   }
