@@ -32,7 +32,7 @@ void displaymessage(int activeState, char* displaymessagetext, char* displaymess
       u8g2.clearBuffer();
       u8g2.setBitmapMode(1);
       //u8g2.drawFrame(0, 0, 128, 64);
-      
+
       if (!screenSaverCheck()) {
         image_flip = !image_flip;
         unsigned int align_right;
@@ -57,7 +57,7 @@ void displaymessage(int activeState, char* displaymessagetext, char* displaymess
               u8g2.drawXBMP(0,0, icon_width, icon_height, brewing_rotate_bits);
             }
             break;
-          case 3: 
+          case 3:
             if (brewReady) {
               if (image_flip) {
                 u8g2.drawXBMP(0,0, icon_width, icon_height, brew_ready_bits);
@@ -94,7 +94,7 @@ void displaymessage(int activeState, char* displaymessagetext, char* displaymess
             }
             break;
         }
-  
+
         //display current and target temperature
         if (activeState > 0 && activeState != 4) {
           if (Input - 100 > FLT_EPSILON) {
@@ -110,7 +110,7 @@ void displaymessage(int activeState, char* displaymessagetext, char* displaymess
           u8g2.println("C");
           u8g2.setFont(u8g2_font_open_iconic_embedded_1x_t);
           u8g2.drawGlyph(align_right-11, 3+7, 0x0046);
-  
+
           if (Input <= 105) { //only show setpoint if we are not steaming
             if (setPoint >= 100) {
               align_right = align_right_3digits;
@@ -124,7 +124,7 @@ void displaymessage(int activeState, char* displaymessagetext, char* displaymess
             u8g2.print((char)176);
             u8g2.println("C");
             u8g2.setFont(u8g2_font_open_iconic_other_1x_t);
-            u8g2.drawGlyph(align_right - 11 , 20+7, 0x047); 
+            u8g2.drawGlyph(align_right - 11 , 20+7, 0x047);
           }
         } else if (activeState == 4) {
           totalbrewtime = (OnlyPID ? brewtime : preinfusion + preinfusionpause + brewtime) * 1000;
@@ -136,7 +136,7 @@ void displaymessage(int activeState, char* displaymessagetext, char* displaymess
           u8g2.print(bezugsZeit / 1000);
           u8g2.setFont(u8g2_font_profont10_tf);
           u8g2.println("s");
-          if (totalbrewtime >0) { 
+          if (totalbrewtime >0) {
             u8g2.setFont(u8g2_font_open_iconic_embedded_1x_t);
             u8g2.drawGlyph(align_right-11, 3+7, 0x0046);
             u8g2.setFont(u8g2_font_profont22_tf);
@@ -210,8 +210,8 @@ void displaymessage(int activeState, char* displaymessagetext, char* displaymess
         u8g2.println(" S");
       }
       #endif
-      
-      //(optional) add 2 text lines 
+
+      //(optional) add 2 text lines
       u8g2.setFont(u8g2_font_profont11_tf);
       u8g2.setCursor(ALIGN_CENTER(displaymessagetext), 44);  // 9 pixel space between lines
       u8g2.print(displaymessagetext);
@@ -237,10 +237,10 @@ void displaymessage(int activeState, char* displaymessagetext, char* displaymess
           icon_counter++;
         }
       }
-      #endif 
+      #endif
 
       u8g2.sendBuffer();
-      
+
     }
   }
 }

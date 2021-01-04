@@ -55,7 +55,7 @@ bool mqtt_publish(char* reading, char* payload) {
   if (!mqtt_working()) { return false; }
   char topic[MQTT_MAX_PUBLISH_SIZE];
   snprintf(topic, MQTT_MAX_PUBLISH_SIZE, "%s%s/%s", mqtt_topic_prefix, hostname, reading);
-  
+
   if (strlen(topic) + strlen(payload) >= MQTT_MAX_PUBLISH_SIZE) {
     ERROR_print("mqtt_publish() wants to send too much data (len=%u)\n", strlen(topic) + strlen(payload));
     return false;

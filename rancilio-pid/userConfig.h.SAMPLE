@@ -4,13 +4,13 @@
  *****************************************************/
 
 #ifndef _userConfig_H
-#define _userConfig_H  
+#define _userConfig_H
 
 /********************************************************
  * General settings
  *****************************************************/
 #define MACHINE_TYPE "rancilio"  // supported values are "rancilio" and "gaggia".
- 
+
 #define FORCE_OFFLINE 0       // 0=Use network | 1=Disable all network stuff (WiFi, MQTT, Blynk).
 #define DISABLE_SERVICES_ON_STARTUP_ERRORS 1 // 1=on (default) when a service cannot be connected during startup, never retry | 0=off Try reconnecting to service during regular operations.
 #define ONLYPID 1             // 1=Only PID with no Preinfussion | 0=PID + Preinfussion
@@ -35,7 +35,7 @@
 //#define DEBUGMODE              // to enable Debug uncomment this line. Afterwards you can connect via telnet to pot 23 to see debug logs.
 
 
-/*******   
+/*******
  * Hardware GPIO Pin Mapping (just change values but don't comment)
  *******/
 #define pinTemperature    2    // read temperature (TSIC)
@@ -46,9 +46,9 @@
 #define pinLed            15   // (BREW_READY_LED=1) brewReady LED (16 is also "free" to use)
 
 
-/*******   
+/*******
  * Display Settings
- *******/       
+ *******/
 #define DISPLAY 0                         // 0=Deaktiviert, 1=SH1106_128X64, 2=SSD1306_128X64
 #define ICON_COLLECTION 0                 // 0:="simple", 1:="smiley", 2:="winter"
 #define DISPLAY_TEXT "Bleeding-Edge PID"  // Text is displayed on bootup (max 21 chars)
@@ -62,12 +62,12 @@
                                           // to shutdown (Silvia 5E: 1800). Show countdown for the last 3 minutes.
 #define ENABLE_USER_MENU  0               // 0 = off | 1 = on (only for ONLYPID=1) USE GPIO A0 (ADC0) PIN to detect the hardware buttons
 
-/*******   
+/*******
  * General PID values
  *******/
 #define STEADYPOWER 4.6 // Constant power of heater to accomodate against loss of heat to environment (in %)
                         // (Rancilio Silvia 5E: 4.6 , ...)
-#define STEADYPOWER_OFFSET_TIME 850   // If brew group is very cold, we need to put additional power to the heater: 
+#define STEADYPOWER_OFFSET_TIME 850   // If brew group is very cold, we need to put additional power to the heater:
                                       // How long should this additional power be delivered (in s) (Rancilio Silvia 5E: 850, ...)
 #define STEADYPOWER_OFFSET 3.0        // How much power should be added? (in %) (Rancilio Silvia 5E: 2.9, ...)
 
@@ -86,15 +86,15 @@
 #define AGGOTV 40       // Tv (Rancilio Silvia 5E: 40, ...)
 
 
-/*******   
+/*******
  * Preinfussion settings (only useful when ONLYPID=0)
  *******/
-#define PREINFUSION       1.5   //  length of time of the pre-infusion (in sec) 
-#define PREINFUSION_PAUSE 2     // length of time of the pre-infusion pause (time in between the pre-infussion and brewing) (in sec) 
+#define PREINFUSION       1.5   //  length of time of the pre-infusion (in sec)
+#define PREINFUSION_PAUSE 2     // length of time of the pre-infusion pause (time in between the pre-infussion and brewing) (in sec)
 // dont forget to adapt BREWTIME mentioned above
 
 
-/*******   
+/*******
  * networking and services
  *******/
 // Wifi

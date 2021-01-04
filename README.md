@@ -1,6 +1,6 @@
 # ranciliopid - Open source PID for your espresso maschine
 
-BLEEDING EDGE MASTER VERSION 
+BLEEDING EDGE MASTER VERSION
 
 Version 2.4.2
 
@@ -12,7 +12,7 @@ You can chat with us directly using our [discord server](https://discord.gg/VA5Z
 ## Most important features compared to rancilio-pid master:
 1. New PID Controller "Multi-state PID with steadyPower (Bias)"
    - Auto-Tuning of all PID settings. No knowledge or special tunings required.
-   - Distinct PID settings dependend on the current "state" of the maschine. 
+   - Distinct PID settings dependend on the current "state" of the maschine.
    - Most of the settings are either static or semi-automatically tuned, which does not require an PHD (German: Diplom) to understand.
    - Currently 5 states are implemented:
      - Coldstart (maschine is cold)
@@ -38,7 +38,7 @@ You can chat with us directly using our [discord server](https://discord.gg/VA5Z
 1. Many useful functions to be used internally getAverageTemperature(), pastTemperatureChange() + updateTemperatureHistory())
 
 ## ATTENTION:
-- This software is tested thoroughly with the pid-only hardware solution on Silvia 5e, and with a permanently run full-hardware solution on an 10 year old Silvia. Also a 10 year old Gaggia Classic is tested successfully. I am grateful for any further feedback. 
+- This software is tested thoroughly with the pid-only hardware solution on Silvia 5e, and with a permanently run full-hardware solution on an 10 year old Silvia. Also a 10 year old Gaggia Classic is tested successfully. I am grateful for any further feedback.
 - Please monitor our maschine's temperature closely the first few run times. The muti-state pid controller should never lead to temperatures greater than 5 degress above setpoint!
 
 ## Sample bleeding-edge workings
@@ -59,7 +59,7 @@ Installation is as explained on http://rancilio-pid.de/ but with following adapa
 
 ## Instructions on how to update to the latest version of bleeding-edge
 1. Just overwrite all existing files with a newly released version.
-2. Open your userConfig.h file, which had not been overwritten in previous step, and manually check (line by line!) that all updates to the new file userConfig.h.SAMPLE are reflected in your own userConfig.h. 
+2. Open your userConfig.h file, which had not been overwritten in previous step, and manually check (line by line!) that all updates to the new file userConfig.h.SAMPLE are reflected in your own userConfig.h.
 3. Compile, upload and enjoy!
 
 ## Remote Control APIs
@@ -104,7 +104,7 @@ Installation is as explained on http://rancilio-pid.de/ but with following adapa
   - alpha code: Intitial support for an user-menu (ENABLE_USER_MENU/pinBrewButton)
   - alpha code: Initial infos about how to add a case with hardware-buttons to control basic settings directly at maschine.
 - 2.3.0 master:
-  - PID is completely auto-tuned and should work flawlessly after a few starts. No need to configure PID any longer. 
+  - PID is completely auto-tuned and should work flawlessly after a few starts. No need to configure PID any longer.
   - Bleeding-Edge settings can be configured remotely without requiring a running service (blynk, mqtt-server) running in your network or internet. (No extra raspi required)
     You can now freely choose which service you want to use:
     1. Standalone without any network connectivity
@@ -112,10 +112,10 @@ Installation is as explained on http://rancilio-pid.de/ but with following adapa
     3. MQTT Client to connect to an mqtt-services (eg used by smart-home software)
   - MQTT fully implemented so you can publish and subscribe to configure settings and monitor states.
   - THANKS: Added Adrian's library to efficiently read TSIC values (https://github.com/lebuni/ZACwire-Library)
-  - ATTENTION: New default values in userConfig.h. 
+  - ATTENTION: New default values in userConfig.h.
     - It is recommended to intially use default values for STEADYPOWER, STEADYPOWER_OFFSET_TIME, STEADYPOWER_OFFSET, STARTTEMP, BREWDETECTION_POWER, BREWDETECTION_SENSITIVITY. Additionally BREWTIME is from now on also used in ONLYPID=1.
     - GPIO Pin Mapping moved to userConfig.h.
-  - ATTENTION: Installation process changed. Libs must be installed as described in "Instructions on how to migrate from official rancilio to bleeding-edge 
+  - ATTENTION: Installation process changed. Libs must be installed as described in "Instructions on how to migrate from official rancilio to bleeding-edge
     - Copy contents of folder ranciliopid\arduino-libs to your arduino sketchbook location (normally C:\Users\YOUR_NAME\Documents\Arduino)
   - Improve PID:
     - Auto-tuning for starttemp is implemented. No need to adapt the STARTTEMP accordingly when SETPOINT is modified
@@ -124,14 +124,14 @@ Installation is as explained on http://rancilio-pid.de/ but with following adapa
     - One time PID manipulation logic added.
     - PID's I parameter filter is reduced in certain situations more strictly.
   - BrewDetection optimized:
-    - (ONLYPID=1) ATTENTION: The BREWTIME setting defines the time-frame of your "normal" brew (in seconds). 
+    - (ONLYPID=1) ATTENTION: The BREWTIME setting defines the time-frame of your "normal" brew (in seconds).
        When a brew is detected, the brew_timer starts and runs until BREWTIME is reached. During that time
        the heater is heating with BREWDETECTION_POWER.
-    - BREWDETECTION_POWER behaviour changed: 
-      (ONLY_PID=0) The power is applied to heater during the complete brew process. 
+    - BREWDETECTION_POWER behaviour changed:
+      (ONLY_PID=0) The power is applied to heater during the complete brew process.
       (ONLY_PID=1) The power is applied until the brew_timer is larger than BREWTIME or the current temperature is 1.5 Celcius below setpoint.
     - (ONLYPID=1) BREWDETECTION_WAIT setting added: After a brew is started the software based BrewDetection is disabled for this number of seconds to prevent the detection of another brew when flushing water.
-    - (ONLYPID=1) Software BrewDetection estimates the starttime of a brew, so that the brew counter in display is correct. 
+    - (ONLYPID=1) Software BrewDetection estimates the starttime of a brew, so that the brew counter in display is correct.
   - Debug Logs Improvements:
     - Add logs for brewReadyStatistic
     - When connecting by telnet/blynk the hardware- and software configuration is printed
@@ -291,7 +291,7 @@ Installation is as explained on http://rancilio-pid.de/ but with following adapa
 # Special Thanks
 To the great work of the rancilio-pid.de team, just to mention a few: andreas, markus, toppo78, miau.  
 Also to the nice people in the rancilio chat and the ones who contribute and give very much appreciated feedback like helge and Adrian!  
-  
+
 !! Thank you so much for the tasty cup of coffee I enjoy each day !!  
 
 

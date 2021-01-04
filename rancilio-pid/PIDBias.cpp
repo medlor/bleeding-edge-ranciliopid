@@ -1,12 +1,12 @@
 /**********************************************************************************************
  * This is another PID test implementation by <medlor@web.de> based on the great work of
- * 
+ *
  * * Brett Beauregard <br3ttb@gmail.com> brettbeauregard.com
  * * Arduino PID Library - Version 1.2.1
  * * This Library is licensed under the MIT License
  *
  * credits go to him.
- * 
+ *
  * Tobias <medlor@web.de>, Code changes done by me are released under GPLv3.
  *
  **********************************************************************************************/
@@ -59,7 +59,7 @@ int PIDBias::Compute()
       }
       steadyPowerOffsetCalculated = PIDBias::CalculateSteadyPowerOffset();
       const double setPointBand = 0.1;
-      
+
       lastOutput = *myOutput;
       double input = *myInput;
       double error = *mySetpoint - input;
@@ -79,7 +79,7 @@ int PIDBias::Compute()
       if ( signnum_c(error) * signnum_c(lastError) < 0 && (millis() - lastTriggerCrossingSetPoint >30000) ) { //temperature crosses setPoint
         //DEBUG_print("Crossing setPoint\n");
         lastTriggerCrossingSetPoint = millis();
-        
+
         //moving upwards
         if ( sumOutputI > 0 ) {
           //steadyPower auto-tuning
@@ -107,7 +107,7 @@ int PIDBias::Compute()
           }
           */
         }
-        
+
         //moving downwards
         if ( steadyPowerAutoTune && pastChange <= -0.01 && steadyPowerOffsetCalculated >= 0.3 ) {
           DEBUG_print("Auto-Tune steadyPower(%0.2f += %0.2f) (moving down too fast, steadyPowerOffset=%0.2f)\n", *mySteadyPower, 0.2, steadyPowerOffsetCalculated); //convertOutputToUtilisation(sumOutputI / 2));
@@ -117,11 +117,11 @@ int PIDBias::Compute()
           DEBUG_print("Auto-Tune steadyPower(%0.2f += %0.2f) (moving down too fast)\n", *mySteadyPower, 0.1); //convertOutputToUtilisation(sumOutputI / 2));
           *mySteadyPower += 0.1;
         }
-        
+
         //DEBUG_print("Set sumOutputI=0 to stabilize(%0.2f)\n", convertOutputToUtilisation(sumOutputI));
         sumOutputI = 0;
       }
-      
+
       //above target band (setPoint_band) and temp_changes too fast
       if ( steadyPowerAutoTune && error < -setPointBand && (millis() - lastTrigger >30000) ) {
         //steady temp
@@ -148,10 +148,10 @@ int PIDBias::Compute()
             *mySteadyPower -= 0.3;
           }
           lastTrigger = millis();
-        } 
+        }
       }
-      
-      //below target band and temp not going up fast enough 
+
+      //below target band and temp not going up fast enough
       if ( steadyPowerAutoTune && error > setPointBand && pastTemperatureChange(20) <= 0.1 && pastTemperatureChange(20) >= 0 &&
                 sumOutputI == filterSumOutputI && (millis() - lastTrigger >20000) ) {
         //steadyPower auto-tuning
@@ -168,11 +168,11 @@ int PIDBias::Compute()
       //Auto-tune should never increase steadyPower too much (this prevents bugs in not thought of cases)
       if ( steadyPowerAutoTune && (*mySteadyPower > steadyPowerDefault * 1.5 || *mySteadyPower < steadyPowerDefault * 0.5) ) {
         DEBUG_print("Auto-Tune steadyPower(%0.2f) is off too far. Set back to %0.2f\n", *mySteadyPower, steadyPowerDefault);
-        *mySteadyPower = steadyPowerDefault; 
+        *mySteadyPower = steadyPowerDefault;
       }
       if ( steadyPowerAutoTune && *mySteadyPower > 10 ) {
         DEBUG_print("Auto-Tune steadyPower(%0.2f) is by far too high. Force to %0.2f\n", *mySteadyPower, 4.8);
-        *mySteadyPower = 4.8; 
+        *mySteadyPower = 4.8;
       }
 
       //TODO safe-guard against always moving up because of steadyPower (eg no steadyPower above error < 5)
@@ -181,8 +181,8 @@ int PIDBias::Compute()
       if ( error < 0 ) {
 
         //negative outputI shall not be accumulated when above setpoint
-        if ( sumOutputI < 0 ) sumOutputI = outputI;  
-        
+        if ( sumOutputI < 0 ) sumOutputI = outputI;
+
         //reduce impact of outputD
         if ( outputD >= 0 ) {
           //moving downwards: reduce impact of outputD
@@ -200,7 +200,7 @@ int PIDBias::Compute()
         + outputD;
 
       // if we in upper-side of side-band, (nearly) not moving at all due to stable temp but yet not near setpoint, manipulate output once
-      if ( error <= -setPointBand && 
+      if ( error <= -setPointBand &&
            fabs(pastTemperatureChange(20)) <= 0.1 &&
            millis() - lastTrigger2 >30000 ) {
         double factor = 1;
@@ -215,7 +215,7 @@ int PIDBias::Compute()
           lastTrigger2 = millis();
         }
       }
-        
+
       //temporary overwrite output when burst is triggered OR overwrite should happen
       if ( burstOutput > 0 ) {
         output = burstOutput;
@@ -228,7 +228,7 @@ int PIDBias::Compute()
       lastError = error;
       lastTime = now;
       /*
-      DEBUG_print("Input=%6.2f | error=%5.2f delta=%5.2f | Output=%6.2f = b:%5.2f + p:%5.2f + i:%5.2f(%5.2f) + d:%5.2f -\n", 
+      DEBUG_print("Input=%6.2f | error=%5.2f delta=%5.2f | Output=%6.2f = b:%5.2f + p:%5.2f + i:%5.2f(%5.2f) + d:%5.2f -\n",
         *myInput,
         (*mySetpoint - *myInput),
         pastTemperatureChange(10)/2,
@@ -362,7 +362,7 @@ void PIDBias::UpdateSteadyPowerOffset(unsigned long steadyPowerOffset_Activated_
 
 double PIDBias::CalculateSteadyPowerOffset() {
   unsigned long diff = millis() - *mySteadyPowerOffset_Activated;
-  if (*mySteadyPowerOffset_Activated == 0 || *mySteadyPowerOffset_Time <= 0 || 
+  if (*mySteadyPowerOffset_Activated == 0 || *mySteadyPowerOffset_Time <= 0 ||
      (*mySteadyPowerOffset_Activated > 0) && (diff >= *mySteadyPowerOffset_Time*1000)) {
     return 0;
   }
@@ -384,8 +384,8 @@ double PIDBias::GetOutputP() { return outputP;}
 double PIDBias::GetOutputI() { return outputI;}
 double PIDBias::GetSumOutputI() { return sumOutputI;}
 double PIDBias::GetFilterSumOutputI() { return filterSumOutputI; }
-double PIDBias::GetOutputD() { return outputD;} 
-double PIDBias::GetLastOutput() { return lastOutput;} 
+double PIDBias::GetOutputD() { return outputD;}
+double PIDBias::GetLastOutput() { return lastOutput;}
 int PIDBias::GetMode() { return  inAuto ? AUTOMATIC : MANUAL;}
 double PIDBias::GetSteadyPowerOffset() { return *mySteadyPowerOffset;}
 double PIDBias::GetSteadyPowerOffsetCalculated() { return steadyPowerOffsetCalculated; }
