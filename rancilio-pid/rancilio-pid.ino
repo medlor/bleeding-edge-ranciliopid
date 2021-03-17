@@ -582,10 +582,10 @@ void setHardwareLed(bool mode) {
   if(enabledHardwareLed == 2 && mode != previousMode){
     previousMode = mode;
     if (mode){
-      fill_solid(leds, enabledHardwareLedNumber, CRGB(ENABLE_HARDWARE_LED_RGB_ON));
+      fill_solid(leds, enabledHardwareLedNumber, CRGB::ENABLE_HARDWARE_LED_RGB_ON);
     }
     else{
-      fill_solid(leds, enabledHardwareLedNumber, CRGB(ENABLE_HARDWARE_LED_RGB_OFF));
+      fill_solid(leds, enabledHardwareLedNumber, CRGB::ENABLE_HARDWARE_LED_RGB_OFF);
     }
     FastLED.show();
   }
