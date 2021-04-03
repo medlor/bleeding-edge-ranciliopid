@@ -103,6 +103,13 @@ void displaymessage(int activeState, char* displaymessagetext, char* displaymess
               }
             }
             break;
+          case 8: // cleaning
+            if (image_flip) {
+              u8g2.drawXBMP(0, 0, icon_width, icon_height, clean_bits);
+            } else {
+              u8g2.drawXBMP(0, 0, icon_width, icon_height, clean_bits);
+            }
+            break;
           default:
             if (MACHINE_TYPE == "rancilio") {
               u8g2.drawXBMP(41, 0, rancilio_logo_width, rancilio_logo_height, rancilio_logo_bits);

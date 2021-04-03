@@ -102,6 +102,7 @@ int activeState = 3;        // (0:= undefined / EMERGENCY_TEMP reached)
                             // 5:= Outer Zone detected (temperature outside of "inner zone")
                             // 6:= steam mode activated
                             // (7:= steam ready, TODO?)
+                            // 8:= clean
 bool emergencyStop = false; // Notstop bei zu hoher Temperatur
 
 /********************************************************
@@ -225,6 +226,16 @@ unsigned long lastSteamMessage = 0;
 bool sensorError    = false;
 int error           = 0;
 int maxErrorCounter = 10 ;  //define maximum number of consecutive polls (of intervaltempmes* duration) to have errors
+
+
+/**
+ * CLEANING PROGRAM
+ */
+int cleaningModeActivated = 0;
+int cleaningCycles = 5;
+int cleaningInterval = 10;
+int cleaningPause = 2;
+int cycle = 1;
 
 /********************************************************
  * Rest
@@ -429,6 +440,18 @@ BLYNK_WRITE(V44) {
 }
 BLYNK_WRITE(V50) {
   setPointSteam = param.asDouble();
+}
+BLYNK_WRITE(V60) {
+  cleaningModeActivated = param.asInt();
+}
+BLYNK_WRITE(V61) {
+  cleaningCycles = param.asInt();
+}
+BLYNK_WRITE(V62) {
+  cleaningInterval = param.asInt();
+}
+BLYNK_WRITE(V63) {
+  cleaningPause = param.asInt();
 }
 
 
@@ -754,6 +777,60 @@ void refreshTemp() {
   }
 }
 
+void clean() {
+  if (OnlyPID) {
+    return;
+  }
+  unsigned long aktuelleZeit = millis();
+  if (simulatedBrewSwitch && (brewing == 1 || waitingForBrewSwitchOff == false) ) {
+    totalbrewtime = (cleaningInterval + cleaningPause) * 1000;
+    if (brewing == 0) {
+      brewing = 1;  // Attention: For OnlyPID==0 brewing must only be changed in this function! Not externally.
+      startZeit = aktuelleZeit;
+      waitingForBrewSwitchOff = true;
+    }
+    bezugsZeit = aktuelleZeit - startZeit;
+    if (aktuelleZeit >= lastBrewMessage + 500) {
+      lastBrewMessage = aktuelleZeit;
+      DEBUG_print("clean(): bezugsZeit=%lu totalbrewtime=%lu cycle=%lu\n", bezugsZeit/1000, totalbrewtime/1000, cycle);
+    }
+    if (bezugsZeit <= totalbrewtime) {
+      if (bezugsZeit <= cleaningInterval * 1000) {  
+          digitalWrite(pinRelayVentil, relayON);
+          digitalWrite(pinRelayPumpe, relayON);
+      } else {
+        digitalWrite(pinRelayVentil, relayOFF);
+        digitalWrite(pinRelayPumpe, relayOFF);
+      }
+    } else {
+      if (cycle != cleaningCycles) {
+        startZeit = aktuelleZeit;
+        cycle = cycle + 1;
+      } else {
+        DEBUG_print("End clean()\n");
+        brewing = 0;
+        cycle = 1;
+        digitalWrite(pinRelayVentil, relayOFF);
+        digitalWrite(pinRelayPumpe, relayOFF);
+      }
+    }
+  } else if (simulatedBrewSwitch && !brewing) {  //corner-case: switch=On but brewing==0
+    waitingForBrewSwitchOff = true;  //just to be sure
+    bezugsZeit = 0;
+  } else if (!simulatedBrewSwitch) {
+    if (waitingForBrewSwitchOff) {
+      DEBUG_print("simulatedBrewSwitch=off\n");
+    }
+    waitingForBrewSwitchOff = false;
+    if (brewing == 1) {
+      digitalWrite(pinRelayVentil, relayOFF);
+      digitalWrite(pinRelayPumpe, relayOFF);
+      brewing = 0;
+      cycle = 1;
+    }
+    bezugsZeit = 0;
+  }
+}
 
 /********************************************************
     PreInfusion, Brew , if not Only PID
@@ -1401,9 +1478,13 @@ void loop() {
 
   checkControls(controlsConfig);  //transform controls to actions
 
-  //handle brewing if button is pressed (ONLYPID=0 for now, because ONLYPID=1_with_BREWDETECTION=1 is handled in actionControl)
-  //ideally brew() should be controlled in our state-maschine (TODO)
-  brew();
+  if (cleaningModeActivated == 1) {
+    clean();
+  } else {
+    //handle brewing if button is pressed (ONLYPID=0 for now, because ONLYPID=1_with_BREWDETECTION=1 is handled in actionControl)
+    //ideally brew() should be controlled in our state-maschine (TODO)
+    brew();
+  }
 
   //check if PID should run or not. If not, set to manuel and force output to zero
   if (pidON == 0 && pidMode == 1) {
@@ -1530,7 +1611,13 @@ void loop() {
       mqtt_publish("events", debugline);
     }
 
-    displaymessage(activeState, "", "");
+    // displaymessage(activeState, "", "");
+    if  (cleaningModeActivated == 1) {
+        displaymessage(8, "CLEANING", "ON");
+    } else {
+        displaymessage(activeState, "", "");
+    }
+        
     power_off_timer = ENABLE_POWER_OFF_COUNTDOWN - ((millis() - lastBrewEnd) / 1000);
     sendToBlynk();
 
