@@ -260,6 +260,8 @@ char* blynkReadyLedColor = "#000000";
 unsigned long lastCheckBrewReady = 0;
 unsigned long lastBrewReady = 0;
 unsigned long lastBrewEnd = 0;    //used to determime the time it takes to reach brewReady==true
+unsigned long power_off_timer = ENABLE_POWER_OFF_COUNTDOWN;
+unsigned int power_off_minutes = power_off_timer/60;
 bool brewReady = false;
 const int expected_eeprom_version = 5;        // EEPROM values are saved according to this versions layout. Increase if a new layout is implemented.
 unsigned long eeprom_save_interval = 28*60*1000UL;  //save every 28min
@@ -932,12 +934,17 @@ void sendToBlynk() {
         blynksendcounter++;
       }
     }
-    if (blynksendcounter >= 5) {
+    if (blynksendcounter == 5) {
       if (String(Input, 2) != PreviousInputString) {
         Blynk.virtualWrite(V2, String(Input, 2)); //send value to server
         PreviousInputString = String(Input, 2);
       }
+      Blynk.virtualWrite(V3, setPoint);
       //Blynk.syncVirtual(V2);  //get value from server
+    }
+    if (blynksendcounter >= 6) {
+      power_off_minutes = power_off_timer/60 +  1;
+      Blynk.virtualWrite(V64, (power_off_minutes > 1 ? "~" : "<") + String(power_off_minutes));
       blynksendcounter = 0;
     }
     blynksendcounter++;
@@ -1524,6 +1531,7 @@ void loop() {
     }
 
     displaymessage(activeState, "", "");
+    power_off_timer = ENABLE_POWER_OFF_COUNTDOWN - ((millis() - lastBrewEnd) / 1000);
     sendToBlynk();
 
   } else if (sensorError) {
