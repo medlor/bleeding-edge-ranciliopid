@@ -3,3 +3,4 @@ userConfig.h
 *.swp
 .vscode
 .pio/*
+.DS_Store
